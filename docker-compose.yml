@@ -1,0 +1,25 @@
+version: '3.5'
+
+services:
+  daemon_api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: daemon_api
+    image: cbb23021/daemon_api:1.0
+    volumes:
+      - ./src:/app:rw
+      - ~/daemon/daemon_static/log/daemon:/app/log:rw
+      - ~/daemon/daemon_static/image:/app/static/image:rw
+    env_file: dev.env
+    networks:
+      - daemon-network
+    ports:
+      - "5917:5000"
+    tty: true
+
+networks:
+  daemon-network:
+    external: true
+    name: local
+

@@ -6,7 +6,7 @@ def _import_routes():
     """ USER MANAGEMENT """
 
     modules = [
-        # 'controllers.auth_routes',
+        'controllers.auth_routes',
         # 'controllers.member_routes',
         # 'controllers.payment_routes',
         # 'controllers.provider_routes',

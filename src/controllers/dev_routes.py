@@ -1,12 +1,12 @@
+from flask import request
+
+from app import app
 from common.const import Const
 from common.error_handler import ErrorCode, ValidationError
 from common.utils.auth_tool import AuthTool
 from common.utils.encrypt_tool import Encrypt
 from common.utils.operation_recorder import OperationRecorder
 from common.utils.response_handler import ResponseHandler
-from flask import request
-
-from app import app
 
 
 @app.route('/dev/info', methods=['GET', 'POST', 'PUT', 'DELETE'])
@@ -53,4 +53,23 @@ def dev_error():
 @app.route('/dev/hi', methods=['GET'])
 def dev_hi():
     print('hello world')
+    return ResponseHandler.jsonify(True)
+
+
+@app.route('/dev/test', methods=['GET'])
+def test():
+    from common.models import Member, Ticket
+    from common.utils.orm_tool import ORMTool
+    from sqlalchemy.orm.attributes import flag_modified
+    user = Member.query.filter(Member.id == 3).first()
+    print(user.email)
+    user.ticket.amount['game'] += 10
+    flag_modified(user.ticket, 'amount')
+    ORMTool.flush()
+
+    t = Ticket.query.filter(Ticket.member_id == 3).first()
+    print(t.amount)
+    ORMTool.commit()
+    print(t.amount)
+
     return ResponseHandler.jsonify(True)

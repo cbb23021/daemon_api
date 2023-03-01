@@ -7,6 +7,7 @@ class Config:
     SYSTEM_NAME = os.environ['SYSTEM_NAME']
     SYSTEM_VERSION = os.environ['SYSTEM_VERSION']
     ENVIRONMENT = os.environ['ENVIRONMENT']
+    CONSTRAIN_VERSION = os.environ['CONSTRAIN_VERSION']
 
     # --- Salt --- #
     SALT = os.environ['SALT']
@@ -45,3 +46,15 @@ class Config:
 
     # --- upload --- #
     UPLOAD_FOLDER = 'static'
+
+    #########################
+    # === 3rd Party API === #
+    #########################
+    # --- email --- #
+    MAIL_SERVER = os.environ.get('MAIL_SERVER')
+    MAIL_PORT = 465
+    MAIL_USE_SSL = True
+    MAIL_MAX_EMAILS = 10  # 有些郵件伺服器會限制一次連接中的發送郵件的上限。 你可以設置重連前的發送郵件的最大數
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    VERIFY_EMAIL_PATTERN = f'{FRONTEND_HOST}/email-verification-result/{{token}}'

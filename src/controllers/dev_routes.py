@@ -1,11 +1,16 @@
+from datetime import datetime, timedelta
+
 from flask import request
 
 from app import app
 from common.const import Const
 from common.error_handler import ErrorCode, ValidationError
+from common.models import LottoDraw
 from common.utils.auth_tool import AuthTool
+from common.utils.data_cache import DataCache
 from common.utils.encrypt_tool import Encrypt
 from common.utils.operation_recorder import OperationRecorder
+from common.utils.orm_tool import ORMTool
 from common.utils.response_handler import ResponseHandler
 
 
@@ -58,9 +63,10 @@ def dev_hi():
 
 @app.route('/dev/test', methods=['GET'])
 def test():
+    from sqlalchemy.orm.attributes import flag_modified
+
     from common.models import Member, Ticket
     from common.utils.orm_tool import ORMTool
-    from sqlalchemy.orm.attributes import flag_modified
     user = Member.query.filter(Member.id == 3).first()
     print(user.email)
     user.ticket.amount['game'] += 10
@@ -73,3 +79,18 @@ def test():
     print(t.amount)
 
     return ResponseHandler.jsonify(True)
+
+
+@app.route('/dev/draw', methods=['POST'])
+def create_draw():
+    data = {
+        'name': 'testtest',
+        'period': 1,
+        'open_dt': datetime.now() + timedelta(minutes=3),
+        'status': Const.DrawStatus.ACTIVATED,
+        'fee': 10,
+        'size': 10,
+    }
+    draw = ORMTool.insert(model=LottoDraw, **data)
+    DataCache.push_active_draw_ids(draw_ids=[draw.id])
+    return draw

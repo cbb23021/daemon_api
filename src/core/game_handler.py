@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 from sqlalchemy.orm.attributes import flag_modified
@@ -22,7 +23,7 @@ class LottoHandler:
 
     @classmethod
     def join_game(cls, user, payload):
-        """ 
+        """
         zone
         (1, 2, 3, 4, 5, 6, 7)
         (a, b, c, d, e, f, g)
@@ -89,6 +90,7 @@ class LottoHandler:
             member_id=user.id,
             cash=charge_fee['cash'],
             ticket=charge_fee['ticket'],
+            number=json.dumps(draw_set),
             join_dt=datetime.now().strftime("%Y-%m-%dT%H-%M-%S"),
             remark=remark,
         )

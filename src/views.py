@@ -13,7 +13,7 @@ def _import_routes():
         # 'controllers.callback_routes',
         # 'controllers.system_routes',
         # 'controllers.follow_routes',
-        # 'controllers.game_routes',
+        'controllers.game_routes',
         # 'controllers.task_routes',
         # 'controllers.transaction_routes',
         # 'controllers.article_routes',

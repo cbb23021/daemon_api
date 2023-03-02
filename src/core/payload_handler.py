@@ -115,3 +115,13 @@ class PayloadSchema:
         'device_id': str,
         'referral_code': str,
     })
+
+    LOTTO_NUMS = Schema({
+        'a': int,
+        'b': int,
+        'c': int,
+        'd': int,
+        'e': int,
+        'f': int,
+        'g': int,
+    })

@@ -2,6 +2,7 @@ import threading
 
 from common.const import Const
 from common.error_handler import ErrorCode, ValidationError
+from common.text.text_handler import TextHandler
 from common.utils.data_cache import DataCache
 from common.utils.email_handler import EmailHandler
 from common.utils.toolkit import Toolkit
@@ -10,7 +11,7 @@ from common.utils.toolkit import Toolkit
 class TwoFactorHandler:
 
     @classmethod
-    def send_email_verification(cls, email):
+    def send_email_verification(cls, email, task):
         """
         阻擋短時間多次嘗試
         發送驗證信
@@ -31,7 +32,7 @@ class TwoFactorHandler:
 
         thread = threading.Thread(
             target=EmailHandler.send_verification,
-            args=(email, ),
+            args=(email, task),
         )
         thread.start()
         return True
@@ -51,6 +52,7 @@ class TwoFactorHandler:
         cls._vaildate(email=email)
         EmailHandler.verify_email(email=email, otp=otp)
         DataCache.set_verified_email(email=email, otp=otp)
+        DataCache.del_verify_email_otp(email=email)
         return True
 
     @classmethod
@@ -60,4 +62,13 @@ class TwoFactorHandler:
         """
         cls._vaildate(email=email)
         EmailHandler.verify_verified_email(email=email, otp=otp)
+        return True
+
+    @classmethod
+    def verify_forgot_password(cls, email, otp):
+        """
+        - 檢查token 內容是否與信箱一致 並驗證
+        """
+        cls._vaildate(email=email)
+        EmailHandler.verify_email(email=email, otp=otp)
         return True

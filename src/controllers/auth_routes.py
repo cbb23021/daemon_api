@@ -32,3 +32,48 @@ def member_verify_email(payload):
 def member_register(payload):
     result = SystemHandler.register(payload=payload)
     return ResponseHandler.jsonify(result)
+
+
+""" Authorization """
+
+
+@app.route('/login/email', methods=['POST'])
+@Toolkit.inspect_version()
+@PayloadUtils.inspect_schema(PayloadSchema.EMAIL_LOGIN)
+def login_by_email(payload):
+    """ 會員 使用 email 登入 """
+    result = AuthTool.member_login(
+        email=payload['email'],
+        password=payload['password'],
+    )
+    return ResponseHandler.jsonify(results=result)
+
+
+@app.route('/refresh-token', methods=['POST'])
+@Toolkit.inspect_version()
+@PayloadUtils.inspect_schema(PayloadSchema.REFRESH_TOKEN)
+def member_refresh_token(payload):
+    """ 更新 Access Token """
+    refresh_token = payload['refresh_token']
+    result = AuthTool.member_refresh(refresh_token=refresh_token)
+    return ResponseHandler.jsonify(results=result)
+
+
+""" Reset Password: [request reset password] -> [verify otp] -> [reset password] """
+
+
+@app.route('/request/reset-password', methods=['POST'])
+@Toolkit.inspect_version()
+@PayloadUtils.inspect_schema(PayloadSchema.REQUEST_RESET_PASSWORD)
+def member_request_reset_password(payload):
+    """ 請求 重設密碼 (忘記密碼) """
+    result = SystemHandler.request_reset_password(payload=payload)
+    return ResponseHandler.jsonify(result)
+
+
+@app.route('/reset-password', methods=['POST'])
+@Toolkit.inspect_version()
+@PayloadUtils.inspect_schema(PayloadSchema.RESET_PASSWORD)
+def member_reset_password(payload):
+    result = SystemHandler.reset_password(payload=payload)
+    return ResponseHandler.jsonify(result)

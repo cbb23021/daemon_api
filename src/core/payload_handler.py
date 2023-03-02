@@ -61,6 +61,17 @@ class PayloadSchema:
         'password': Regex(_PASSWORD_PATTERN),
         'otp': Regex(_OTP_CODE),
     })
+    """ FORGOT PASSWORD (email) """
+
+    REQUEST_RESET_PASSWORD = Schema({
+        'email': Regex(_EMAIL_PATTERN),
+    })
+
+    RESET_PASSWORD = Schema({
+        'email': Regex(_EMAIL_PATTERN),
+        'password': Regex(_PASSWORD_PATTERN),
+        'otp': Regex(_OTP_CODE),
+    })
     """ MEMBER """
 
     UPDATE_PASSWORD = Schema({
@@ -74,27 +85,6 @@ class PayloadSchema:
 
     LOGIN_GAME = Schema({
         'provider_id': int,
-    })
-    """ FORGOT PASSWORD (PHONE) """
-
-    REQUEST_RESET_PASSWORD = Schema({
-        'email': Regex(_EMAIL_PATTERN),
-    })
-
-    RESET_PASSWORD = Schema({
-        'email': Regex(_EMAIL_PATTERN),
-        'password': Regex(_PASSWORD_PATTERN),
-        'otp': Regex(_OTP_CODE),
-    })
-    """ VERIFICATION """
-
-    REQUEST_VERIFY_EMAIL = Schema({
-        'email': Regex(_EMAIL_PATTERN),
-    })
-
-    VERIFY_EMAIL = Schema({
-        'email': Regex(_EMAIL_PATTERN),
-        'otp': Regex(_OTP_CODE)
     })
     """  FOLLOW  """
 

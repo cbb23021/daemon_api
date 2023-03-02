@@ -2,6 +2,7 @@ from app import config
 from common.const import Const
 from common.error_handler import ErrorCode, ValidationError
 from common.models import Cash, Member, Ticket
+from common.text.text_handler import TextHandler
 from common.utils.data_cache import DataCache
 from common.utils.encrypt_tool import Encrypt, KeyGenerator
 from common.utils.orm_tool import ORMTool
@@ -25,7 +26,8 @@ class SystemHandler:
         user = Member.query.filter_by(email=email).first()
         if user:
             raise ValidationError(error_code=ErrorCode.EMAIL_IS_EXIST)
-        TwoFactorHandler.send_email_verification(email=email)
+        TwoFactorHandler.send_email_verification(
+            email=email, task=TextHandler._TASK_REGESTER)
         return True
 
     @classmethod
@@ -98,30 +100,32 @@ class SystemHandler:
                                          member_id=new_user.id,
                                          amount=init_ticket)
         # issue rewards for register
-        TaskTool.issue_task_reward( user=new_user, type_=Const.Task.Type.REGISTER)
+        TaskTool.issue_task_reward(user=new_user,
+                                   type_=Const.Task.Type.REGISTER)
         ORMTool.commit()
         DataCache.del_verified_email(email=email)
         return True
 
     @classmethod
     def request_reset_password(cls, payload):
-        """ 請求OTP 重置密碼 手機 '必須存在' """
-        phone = payload['phone']
-        user = Member.query.filter_by(phone=phone).first()
+        """ 請求OTP 重置密碼 '必須存在' """
+        email = payload['email']
+        user = Member.query.filter_by(email=email).first()
         if not user:
-            raise ValidationError(error_code=ErrorCode.PHONE_IS_NOT_EXIST)
-        # PhoneHandler.send_sms_otp(phone=phone)
+            raise ValidationError(error_code=ErrorCode.EMAIL_IS_EXIST)
+        TwoFactorHandler.send_email_verification(
+            email=email, task=TextHandler._TASK_RESET_PASSWORD)
         return True
 
     @classmethod
     def reset_password(cls, payload):
-        phone = payload['phone']
+        email = payload['email']
         otp = payload['otp']
-        user = Member.query.filter_by(phone=phone).first()
+        user = Member.query.filter_by(email=email).first()
         if not user:
             raise ValidationError(error_code=ErrorCode.USER_NOT_FOUND)
-        PhoneHandler.validate_verified_phone(phone=phone, otp=otp)
+        TwoFactorHandler.verify_forgot_password(email=email, otp=otp)
         user.password = Encrypt.encrypt_password(password=payload['password'])
         ORMTool.commit()
-        DataCache.del_verified_phone(phone=phone)
+        DataCache.del_verify_email_otp(email=email)
         return True

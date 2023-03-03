@@ -1,8 +1,10 @@
 import json
+import random
 from datetime import datetime
 
 from sqlalchemy.orm.attributes import flag_modified
 
+from common.const import Const
 from common.error_handler import ErrorCode, ValidationError
 from common.models import LottoDraw
 from common.utils.data_cache import DataCache
@@ -10,6 +12,14 @@ from common.utils.orm_tool import ORMTool
 
 
 class LottoHandler:
+
+    @staticmethod
+    def get_numbers():
+        while True:
+            result = set(random.sample(range(30), 7))
+            if len(result) == 7:
+                break
+        return json.dumps(list(result))
 
     @classmethod
     def _get_spare_order_id(cls, draw):
@@ -32,7 +42,7 @@ class LottoHandler:
 
         """
         is_ticket = payload['is_ticket']
-        draw = {
+        draw_data = {
             'a': payload['a'],
             'b': payload['b'],
             'c': payload['c'],
@@ -41,7 +51,7 @@ class LottoHandler:
             'f': payload['f'],
             'g': payload['g'],
         }
-        draw_set = {v for _, v in draw.items()}
+        draw_set = {v for _, v in draw_data.items()}
         if len(draw_set) < 7:
             raise ValidationError(error_code=ErrorCode.INVALID_OPERATION,
                                   message='Number Can Not Duliplate')
@@ -50,9 +60,10 @@ class LottoHandler:
                 raise ValidationError(error_code=ErrorCode.INVALID_OPERATION,
                                       message=f'<Number:{_}> Over then 30')
         # get latest draw
-        draw = LottoDraw.query.filter_by(
-            LottoDraw.is_archive.is_(False)).order_by(
-                LottoDraw.id.desc()).first()
+        draw = LottoDraw.query.filter(
+            LottoDraw.settle_dt.is_(None),
+            LottoDraw.status == Const.DrawStatus.ACTIVATED,
+        ).order_by(LottoDraw.id.desc()).first()
         if not draw:
             raise ValidationError(error_code=ErrorCode.INVALID_OPERATION,
                                   message='Did Not release New Lotto Draw')
@@ -90,10 +101,16 @@ class LottoHandler:
             member_id=user.id,
             cash=charge_fee['cash'],
             ticket=charge_fee['ticket'],
-            number=json.dumps(draw_set),
+            a=draw_data['a'],
+            b=draw_data['b'],
+            c=draw_data['c'],
+            d=draw_data['d'],
+            e=draw_data['e'],
+            f=draw_data['f'],
+            g=draw_data['g'],
             join_dt=datetime.now().strftime("%Y-%m-%dT%H-%M-%S"),
             remark=remark,
         )
 
         ORMTool.commit()
-        return
+        return True

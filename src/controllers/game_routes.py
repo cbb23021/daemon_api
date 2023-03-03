@@ -16,5 +16,5 @@ from core.payload_handler import PayloadSchema, PayloadUtils
 @OperationRecorder.log()
 def join_game(user, payload):
     """ 開始遊戲 """
-    result = LottoHandler.join_game(user=user)
+    result = LottoHandler.join_game(user=user, payload=payload)
     return ResponseHandler.jsonify(result)

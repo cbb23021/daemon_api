@@ -124,4 +124,13 @@ class PayloadSchema:
         'e': int,
         'f': int,
         'g': int,
+        'is_ticket': bool,
+    })
+
+    DRAW = Schema({
+        'name': str,
+        'period': int,
+        'open_dt': str,
+        'fee': int,
+        'size': int,
     })

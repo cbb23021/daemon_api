@@ -1,3 +1,4 @@
+import json
 from datetime import datetime, timedelta
 
 from flask import request
@@ -12,6 +13,8 @@ from common.utils.encrypt_tool import Encrypt
 from common.utils.operation_recorder import OperationRecorder
 from common.utils.orm_tool import ORMTool
 from common.utils.response_handler import ResponseHandler
+from core.game_handler import LottoHandler
+from core.payload_handler import PayloadSchema, PayloadUtils
 
 
 @app.route('/dev/info', methods=['GET', 'POST', 'PUT', 'DELETE'])
@@ -82,15 +85,28 @@ def test():
 
 
 @app.route('/dev/draw', methods=['POST'])
-def create_draw():
+@PayloadUtils.inspect_schema(schema=PayloadSchema.DRAW)
+def create_draw(payload):
     data = {
-        'name': 'testtest',
-        'period': 1,
-        'open_dt': datetime.now() + timedelta(minutes=3),
+        'name': payload['name'],
+        'period': payload['period'],
+        'number': {
+            'numbers': LottoHandler.get_numbers(),
+        },
+        'open_dt': datetime.strptime(payload['open_dt'], "%Y%m%d"),
         'status': Const.DrawStatus.ACTIVATED,
-        'fee': 10,
-        'size': 10,
+        'fee': payload['fee'],
+        'size': payload['size'],
     }
     draw = ORMTool.insert(model=LottoDraw, **data)
     DataCache.push_active_draw_ids(draw_ids=[draw.id])
-    return draw
+    result = {
+        'id': draw.id,
+        'name': draw.name,
+        'period': draw.period,
+        'open_dt': draw.open_dt,
+        'status': draw.status,
+        'fee': draw.fee,
+        'size': draw.size,
+    }
+    return ResponseHandler.jsonify(result)
